@@ -1,6 +1,7 @@
 "use client";
 
 import api from "@/src/services/api";
+import { User, UserRole } from "@/src/types/auth";
 import {
   createContext,
   ReactNode,
@@ -8,14 +9,6 @@ import {
   useEffect,
   useState,
 } from "react";
-
-type User = {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: "patient" | "doctor" | "admin";
-};
 
 type AuthContextType = {
   user: User | null;
@@ -26,7 +19,7 @@ type AuthContextType = {
     email: string;
     phone: string;
     password: string;
-    role: string;
+    role: UserRole;
   }) => Promise<User>;
   logout: () => void;
 };
@@ -59,9 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (emailOrPhone: string, password: string) => {
     const res = await api.post("/auth/login", { emailOrPhone, password });
-    const data = res.data.data;
+    const data = res.data.data as User;
 
-    localStorage.setItem("doctorbd_token", data.token);
+    localStorage.setItem("doctorbd_token", data.token || "");
     localStorage.setItem("doctorbd_user", JSON.stringify(data));
 
     setUser(data);
@@ -73,12 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string;
     phone: string;
     password: string;
-    role: string;
+    role: UserRole;
   }) => {
     const res = await api.post("/auth/register", payload);
-    const data = res.data.data;
+    const data = res.data.data as User;
 
-    localStorage.setItem("doctorbd_token", data.token);
+    localStorage.setItem("doctorbd_token", data.token || "");
     localStorage.setItem("doctorbd_user", JSON.stringify(data));
 
     setUser(data);

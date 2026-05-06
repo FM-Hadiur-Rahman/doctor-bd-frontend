@@ -22,7 +22,7 @@ import DoctorAppointmentWorkspace from "./DoctorAppointmentWorkspace";
 
 type Props = {
   appointment: Appointment;
-  role?: "patient" | "doctor" | "admin";
+  role?: "patient" | "doctor" | "diagnostic_center" | "admin";
   onCancel?: (id: string) => void;
   onStatusChange?: (id: string, status: string) => void;
 };

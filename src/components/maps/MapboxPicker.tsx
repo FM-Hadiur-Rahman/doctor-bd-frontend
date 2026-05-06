@@ -1,7 +1,7 @@
 "use client";
 
 import "mapbox-gl/dist/mapbox-gl.css";
-import Map, { Marker, MapLayerMouseEvent } from "react-map-gl/mapbox";
+import Map, { Marker, MapMouseEvent } from "react-map-gl/mapbox";
 import { MapPin } from "lucide-react";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function MapboxPicker({ lng, lat, onChange }: Props) {
-  const handleClick = (event: MapLayerMouseEvent) => {
+  const handleClick = (event: MapMouseEvent) => {
     onChange({
       lng: event.lngLat.lng,
       lat: event.lngLat.lat,

@@ -2,16 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, UserRound, Mail, Lock, BadgeCheck } from "lucide-react";
+import {
+  Phone,
+  UserRound,
+  Mail,
+  Lock,
+  BadgeCheck,
+  Building2,
+} from "lucide-react";
 import { useAuth } from "@/src/contexts/AuthContext";
+import { UserRole } from "@/src/types/auth";
 import Button from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
+
+type RegisterForm = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  role: UserRole;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<RegisterForm>({
     name: "",
     email: "",
     phone: "",
@@ -22,8 +38,11 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const update = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const update = (field: keyof RegisterForm, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: field === "role" ? (value as UserRole) : value,
+    }));
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -35,14 +54,47 @@ export default function RegisterPage() {
 
       const user = await register(form);
 
-      if (user.role === "doctor") router.push("/doctor-dashboard");
-      else router.push("/dashboard");
+      if (user.role === "doctor") {
+        router.push("/doctor-dashboard");
+      } else if (user.role === "diagnostic_center") {
+        router.push("/diagnostic-dashboard");
+      } else if (user.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Registration failed");
     } finally {
       setSaving(false);
     }
   };
+
+  const accountTypes: {
+    value: UserRole;
+    label: string;
+    description: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      value: "patient",
+      label: "Patient",
+      description: "Book appointments and manage medical reports.",
+      icon: <UserRound className="h-5 w-5" />,
+    },
+    {
+      value: "doctor",
+      label: "Doctor",
+      description: "Manage patients, appointments, and prescriptions.",
+      icon: <BadgeCheck className="h-5 w-5" />,
+    },
+    {
+      value: "diagnostic_center",
+      label: "Diagnostic Center",
+      description: "Receive referrals and upload patient test reports.",
+      icon: <Building2 className="h-5 w-5" />,
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16">
@@ -51,12 +103,14 @@ export default function RegisterPage() {
           <p className="mb-3 inline-flex rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-[#087CC8]">
             Create your DoctorBD account
           </p>
+
           <h1 className="text-4xl font-black text-slate-950">
-            Register as patient or doctor
+            Register your healthcare account
           </h1>
+
           <p className="mt-3 text-slate-500">
-            Doctors need to create a profile after registration and wait for
-            admin verification.
+            Register as patient, doctor, or diagnostic center. Doctors and
+            diagnostic centers may require admin verification.
           </p>
         </div>
 
@@ -119,23 +173,27 @@ export default function RegisterPage() {
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Account type
             </label>
-            <div className="grid gap-3 md:grid-cols-2">
-              {[
-                ["patient", "Patient"],
-                ["doctor", "Doctor"],
-              ].map(([value, label]) => (
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {accountTypes.map((item) => (
                 <button
-                  key={value}
+                  key={item.value}
                   type="button"
-                  onClick={() => update("role", value)}
-                  className={`flex items-center gap-3 rounded-2xl border p-4 text-left font-bold transition ${
-                    form.role === value
+                  onClick={() => update("role", item.value)}
+                  className={`rounded-2xl border p-4 text-left transition ${
+                    form.role === item.value
                       ? "border-[#087CC8] bg-blue-50 text-[#087CC8]"
-                      : "border-slate-200 bg-white text-slate-700"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"
                   }`}
                 >
-                  <BadgeCheck className="h-5 w-5" />
-                  {label}
+                  <div className="flex items-center gap-3 font-black">
+                    {item.icon}
+                    {item.label}
+                  </div>
+
+                  <p className="mt-2 text-xs font-semibold text-slate-500">
+                    {item.description}
+                  </p>
                 </button>
               ))}
             </div>

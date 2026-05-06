@@ -31,7 +31,7 @@ export default function OtherReferralOptions({
 
   const loadDoctors = async () => {
     try {
-      const res = await doctorService.getAll();
+      const res = await doctorService.getDoctors();
       setDoctors(res.data.data || []);
     } catch {
       setDoctors([]);
